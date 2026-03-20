@@ -7,8 +7,8 @@ import (
 func main() {
 	var t art.Tree
 
-	t.Insert([]byte("cats"), "v1")
-	t.Insert([]byte("cat"), "v2")
+	t.Insert([]byte("cat"), "v1")
+	t.Insert([]byte("cats"), "v2")
 	t.Insert([]byte("cab"), "v3")
 	v, ok := t.Search([]byte("cat"))
 	println("cat:", v, ok)
