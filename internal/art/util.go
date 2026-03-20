@@ -16,7 +16,7 @@ func addchild(n *Node, k byte, child *Node) {
 func checkprefix(n *Node, key []byte, depth int) int {
 	in := n.innerNode
 	var i int
-	for i = 0; i < in.meta.prefixlen && in.meta.prefix[i] == key[depth+i]; i++ { //checks prefix until mismatch
+	for i = 0; i < in.meta.prefixlen && in.meta.prefix[i] == keycheck(key, depth+i); i++ { //checks prefix until mismatch
 
 	}
 	return i
@@ -32,4 +32,13 @@ func findchild(k byte, n *Node) (*Node, int) {
 	}
 	return nil, -1
 
+}
+
+func keycheck(key []byte, depth int) byte {
+	if depth >= len(key) {
+		return 0
+
+	} else {
+		return key[depth]
+	}
 }
