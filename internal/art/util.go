@@ -2,15 +2,21 @@ package art
 
 // TODO: Helper functions (e.g., prefix matching)
 func addchild(n *Node, k byte, child *Node) {
-	for i := 0; i < len(n.innerNode.keys); i++ {
-		if n.innerNode.children[i] == nil {
-			n.innerNode.children[i] = child
-			n.innerNode.keys[i] = k
-			return
-
-		}
+	in := n.innerNode
+	pos := 0
+	for pos < len(in.keys) && in.children[pos] != nil {
+		pos++
 
 	}
+	var i int
+	for i = pos - 1; i > 0 && in.keys[i] > k; i-- {
+		in.keys[i+1] = in.keys[i]
+		in.children[i+1] = in.children[i]
+
+	}
+
+	in.keys[i+1] = k
+	in.children[i+1] = child
 
 }
 func checkprefix(n *Node, key []byte, depth int) int {
