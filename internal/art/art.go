@@ -13,14 +13,6 @@ func (t *Tree) Root() *Node {
 func (t *Tree) Insert(key []byte, value string) {
 	t.root = insert(t.root, value, key, 0)
 }
-
-func (t *Tree) Search(key []byte) (string, bool) {
-	leaf := search(t.root, key, 0) // start from root and depth 0
-	if leaf != nil && isleaf(leaf) {
-		return leaf.leaf.values, true //Node->innerleaf->values
-	}
-	return "", false
-}
 func insert(n *Node, value string, key []byte, depth int) *Node {
 
 	if n == nil {
@@ -70,21 +62,32 @@ func insert(n *Node, value string, key []byte, depth int) *Node {
 	}
 
 }
+func (t *Tree) Search(key []byte) (string, bool) {
+	leaf := search(t.root, key, 0) // start from root and depth 0
+	if leaf != nil && isleaf(leaf) {
+		return leaf.leaf.values, true //Node->innerleaf->values
+	}
+	return "", false
+}
 
 func search(n *Node, key []byte, depth int) *Node {
+	// Base case: nil node means we've reached a dead end.
+	// Key does not exist in this path of the tree.
 	if n == nil {
 		return nil
 	}
 
+	// Reached a leaf node, do a full key comparison.
+	// Necessary because path compression may have skipped bytes.
 	if isleaf(n) {
-		// Verify if the leaf's key actually matches our search key
 		if string(n.leaf.key) == string(key) {
 			return n
 		}
 		return nil
 	}
 
-	// 1. Check if the node's prefix matches the current part of the key
+	// Check if the compressed prefix at this node matches the search key.
+	// If any byte mismatches, the entire subtree is irrelevant.
 	if n.innerNode.meta.prefixlen > 0 {
 		p := checkprefix(n, key, depth)
 		if p != n.innerNode.meta.prefixlen {
@@ -93,10 +96,12 @@ func search(n *Node, key []byte, depth int) *Node {
 		depth += n.innerNode.meta.prefixlen
 	}
 
-	// 2. Bound check: if we've consumed the prefix but the key is finished, and we aren't at a leaf, the key doesn't exist.
+	// Get the next byte to branch on at current depth.
+	// Returns 0 (terminator) if key is exhausted.
 	k := keycheck(key, depth)
 
-	// 3. Find the child corresponding to the byte at the current depth
+	// Find the child corresponding to byte k and recurse deeper.
+	// Return nil if no child exists for this byte.
 	next, _ := findchild(k, n)
 	if next != nil {
 		return search(next, key, depth+1)
