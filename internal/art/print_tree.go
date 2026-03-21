@@ -32,6 +32,7 @@ func PrintTree(n *Node, level int) {
 	for i := 0; i < len(in.keys); i++ {
 		if in.children[i] != nil {
 			fmt.Printf("%s Edge('%c' | %d):\t", indent, in.keys[i], in.keys[i])
+
 			PrintTree(in.children[i], level+1)
 		}
 	}
