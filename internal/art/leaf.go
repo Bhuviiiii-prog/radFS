@@ -14,9 +14,5 @@ func newleaf(value string, key []byte) *Node {
 
 }
 func isleaf(n *Node) bool {
-	if n.leaf != nil {
-		return true
-	} else {
-		return false
-	}
+	return n.leaf != nil
 }
