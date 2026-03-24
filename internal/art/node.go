@@ -11,7 +11,11 @@ const (
 	Node256
 )
 const (
-	Node4max     = 4
+	Node4max   = 4
+	Node16Max  = 16
+	Node48Max  = 48
+	Node256Max = 256
+
 	maxprefixlen = 8
 )
 
@@ -21,10 +25,11 @@ type Node struct {
 }
 
 type innerNode struct {
-	nodeType NodeType
-	keys     []byte
-	children []*Node
-	meta     meta
+	nodeType     NodeType
+	keys         []byte
+	children     []*Node
+	num_children int
+	meta         meta
 }
 
 type meta struct {

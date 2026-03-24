@@ -17,16 +17,16 @@ func insert(n *Node, value string, key []byte, depth int) *Node {
 		new_node.innerNode.meta.prefixlen = i - depth
 		depth = i
 
-		addchild(new_node, keycheck(key, depth), newleaf(value, key))
-		addchild(new_node, keycheck(oldkey, depth), n)
+		new_node = addchild(new_node, keycheck(key, depth), newleaf(value, key))
+		new_node = addchild(new_node, keycheck(oldkey, depth), n)
 		return new_node
 
 	}
 	p := checkprefix(n, key, depth)
 	if p != n.innerNode.meta.prefixlen {
 		new_node := newNode4()
-		addchild(new_node, keycheck(key, depth+p), newleaf(value, key))
-		addchild(new_node, n.innerNode.meta.prefix[p], n)
+		new_node = addchild(new_node, keycheck(key, depth+p), newleaf(value, key))
+		new_node = addchild(new_node, n.innerNode.meta.prefix[p], n)
 		new_node.innerNode.meta.prefixlen = p
 		copy(new_node.innerNode.meta.prefix, n.innerNode.meta.prefix[:p])
 
@@ -43,7 +43,7 @@ func insert(n *Node, value string, key []byte, depth int) *Node {
 		return n
 
 	} else {
-		addchild(n, keycheck(key, depth), newleaf(value, key))
+		n = addchild(n, keycheck(key, depth), newleaf(value, key))
 		return n
 
 	}

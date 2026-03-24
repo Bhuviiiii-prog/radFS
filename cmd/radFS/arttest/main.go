@@ -1,23 +1,27 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/acmpesuecc/radFS/internal/art"
 )
 
 func main() {
-	var t art.Tree
+	tree := &art.Tree{}
 
-	t.Insert([]byte("cart"), "v1")
-	t.Insert([]byte("car"), "v2")
-	t.Insert([]byte("cab"), "v3")
-	v, ok := t.Search([]byte("cat"))
-	println("cat:", v, ok)
+	tree.Insert([]byte{0x0A}, "first")
+	tree.Insert([]byte{0x0A, 0x01}, "second")
 
-	v, ok = t.Search([]byte("cab"))
-	println("cab:", v, ok)
+	val, found := tree.Search([]byte{0x0A})
+	if !found || val != "first" {
 
-	v, ok = t.Search([]byte("cart"))
-	println("cart:", v, ok)
+		fmt.Printf("Expected 'first', got %s\n", val)
+	}
 
-	art.PrintTree(t.Root(), 0)
+	val2, found2 := tree.Search([]byte{0x0A, 0x01})
+	if !found2 || val2 != "second" {
+		fmt.Printf("Expected 'second', got %s\n", val2)
+	}
+
+	//art.PrintTree(tree.Root(), 0)
 }
