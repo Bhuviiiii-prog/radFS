@@ -4,20 +4,12 @@ package art
 func addchild(n *Node, k byte, child *Node) {
 	in := n.innerNode
 	pos := 0
-
-	child1, pos1 := findchild(k, n)
-	if child1 != nil {
-		in.children[pos1] = child
-		return
-	}
-
 	for pos < len(in.keys) && in.children[pos] != nil {
 		pos++
 
 	}
-
 	var i int
-	for i = pos - 1; i >= 0 && in.keys[i] > k; i-- {
+	for i = pos - 1; i > 0 && in.keys[i] > k; i-- {
 		in.keys[i+1] = in.keys[i]
 		in.children[i+1] = in.children[i]
 
@@ -36,6 +28,7 @@ func checkprefix(n *Node, key []byte, depth int) int {
 	return i
 
 }
+
 func findchild(k byte, n *Node) (*Node, int) {
 	in := n.innerNode
 	for i := 0; i < len(in.keys); i++ {
@@ -47,12 +40,33 @@ func findchild(k byte, n *Node) (*Node, int) {
 	return nil, -1
 
 }
-
 func keycheck(key []byte, depth int) byte {
 	if depth >= len(key) {
-		return 1
+		return 0
 
 	} else {
 		return key[depth]
 	}
+}
+
+// removechild removes the child with key k from node n by shifting
+// all subsequent keys and children left to fill the gap.
+func removechild(n *Node, k byte) {
+	_, pos := findchild(k, n)
+	if pos == -1 {
+		return // key not found, nothing to remove
+	}
+
+	in := n.innerNode
+	last := len(in.keys) - 1
+
+	// shift everything after pos one step to the left
+	for i := pos; i < last; i++ {
+		in.keys[i] = in.keys[i+1]
+		in.children[i] = in.children[i+1]
+	}
+
+	// clear the now-duplicate last slot to avoid stale pointers
+	in.keys[last] = 0
+	in.children[last] = nil
 }
