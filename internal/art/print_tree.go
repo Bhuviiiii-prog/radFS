@@ -20,11 +20,14 @@ func PrintTree(n *Node, level int) {
 	in := n.innerNode
 
 	prefixlen := in.meta.prefixlen
-	if prefixlen < 0 || prefixlen > len(in.meta.prefix) {
-		prefixlen = 0
-	}
+	prefix := ""
+	if prefixlen < maxprefixlen {
+		prefix = string(in.meta.prefix[:prefixlen])
 
-	prefix := string(in.meta.prefix[:prefixlen])
+	} else {
+		leaf := fetchleaf(n)
+		prefix = string(leaf.leaf.key)
+	}
 
 	fmt.Println(indent+"Node(prefix=\""+prefix+"\", prefixLen=", prefixlen, ")")
 

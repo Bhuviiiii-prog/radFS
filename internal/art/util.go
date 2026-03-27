@@ -33,10 +33,25 @@ func addchild(n *Node, k byte, child *Node) *Node {
 func checkprefix(n *Node, key []byte, depth int) int {
 	in := n.innerNode
 	var i int
-	for i = 0; i < in.meta.prefixlen && in.meta.prefix[i] == keycheck(key, depth+i); i++ { //checks prefix until mismatch
+	maxcmp := min(maxprefixlen, in.meta.prefixlen)
+
+	for i = 0; i < maxcmp; i++ { //checks prefix until mismatch
+		if in.meta.prefix[i] != keycheck(key, depth+i) {
+			return i // case when you find mismatch and the mismatch is less than maxprefixlen
+
+		}
 
 	}
-	return i
+	if in.meta.prefixlen > maxprefixlen {
+		leaf := fetchleaf(n)
+		for ; i < in.meta.prefixlen && keycheck(key, depth+i) == keycheck(leaf.leaf.key, depth+i); i++ {
+
+		}
+		return i // case when you find mismatch and the mismatch is more than maxprefixlen
+
+	}
+
+	return i // case when you find mismatch and the mismatch is equal maxprefixlen
 
 }
 func findchild(k byte, n *Node) (*Node, int) {
@@ -125,5 +140,20 @@ func grow(n *Node) *Node {
 func copymeta(n *Node, new_node *Node) {
 	new_node.innerNode.meta.prefix = n.innerNode.meta.prefix
 	new_node.innerNode.meta.prefixlen = n.innerNode.meta.prefixlen
+
+}
+
+func fetchleaf(n *Node) *Node {
+	if isleaf(n) {
+		return n
+	}
+	for i := 0; i < len(n.innerNode.keys); i++ {
+		if n.innerNode.children[i] != nil {
+			return fetchleaf(n.innerNode.children[i])
+
+		}
+
+	}
+	return nil
 
 }
