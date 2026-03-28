@@ -35,8 +35,8 @@ func checkprefix(n *Node, key []byte, depth int) int {
 	var i int
 	maxcmp := min(maxprefixlen, in.meta.prefixlen)
 
-	for i = 0; i < maxcmp; i++ { //checks prefix until mismatch
-		if in.meta.prefix[i] != keycheck(key, depth+i) {
+	for i = 0; i < maxcmp && depth+i < len(key); i++ { //checks prefix until mismatch
+		if in.meta.prefix[i] != key[depth+i] {
 			return i // case when you find mismatch and the mismatch is less than maxprefixlen
 
 		}
@@ -44,10 +44,14 @@ func checkprefix(n *Node, key []byte, depth int) int {
 	}
 	if in.meta.prefixlen > maxprefixlen {
 		leaf := fetchleaf(n)
-		for ; i < in.meta.prefixlen && keycheck(key, depth+i) == keycheck(leaf.leaf.key, depth+i); i++ {
+		leafkey := leaf.leaf.key
+		for ; i < in.meta.prefixlen && depth+i < len(leafkey) && depth+i < len(key); i++ {
+			if key[depth+i] != leaf.leaf.key[depth+i] {
+				return i // case when you find mismatch and the mismatch is more than maxprefixlen
+
+			}
 
 		}
-		return i // case when you find mismatch and the mismatch is more than maxprefixlen
 
 	}
 
@@ -58,7 +62,7 @@ func findchild(k byte, n *Node) (*Node, int) {
 	in := n.innerNode
 	switch in.nodeType {
 	case Node4, Node16:
-		for i := 0; i < len(in.keys); i++ {
+		for i := 0; i < in.num_children; i++ {
 			if in.keys[i] == k {
 				return in.children[i], i //finds the node and the position
 			}
@@ -81,24 +85,22 @@ func findchild(k byte, n *Node) (*Node, int) {
 
 }
 
-func keycheck(key []byte, depth int) byte {
-	if depth >= len(key) {
-		return 1
-
-	} else {
-		return key[depth]
-	}
-}
-
 func grow(n *Node) *Node {
 	switch n.innerNode.nodeType {
 	case Node4:
 		n16 := newNode16()
 		copymeta(n, n16)
+		index := 0
 		for i := 0; i < 4; i++ {
-			n16.innerNode.keys[i] = n.innerNode.keys[i]
-			n16.innerNode.children[i] = n.innerNode.children[i]
+			if n.innerNode.children[i] != nil {
+				n16.innerNode.keys[index] = n.innerNode.keys[i]
+				n16.innerNode.children[index] = n.innerNode.children[i]
+				index++
+
+			}
+
 		}
+		n16.innerNode.num_children = index
 		return n16
 	case Node16:
 		n48 := newNode48()
@@ -117,6 +119,7 @@ func grow(n *Node) *Node {
 			}
 
 		}
+		n48.innerNode.num_children = index
 		return n48
 
 	case Node48:
@@ -131,6 +134,7 @@ func grow(n *Node) *Node {
 			}
 
 		}
+
 		return n256
 
 	}
@@ -147,6 +151,10 @@ func fetchleaf(n *Node) *Node {
 	if isleaf(n) {
 		return n
 	}
+	if n.innerNode.leaf != nil {
+		return n.innerNode.leaf
+	}
+
 	for i := 0; i < len(n.innerNode.keys); i++ {
 		if n.innerNode.children[i] != nil {
 			return fetchleaf(n.innerNode.children[i])

@@ -25,11 +25,14 @@ type Node struct {
 }
 
 type innerNode struct {
-	nodeType     NodeType
-	keys         []byte
-	children     []*Node
+	nodeType NodeType
+	keys     []byte
+	children []*Node
+	leaf     *Node
+
 	num_children int
-	meta         meta
+
+	meta meta
 }
 
 type meta struct {

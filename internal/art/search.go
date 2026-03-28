@@ -28,7 +28,7 @@ func search(n *Node, key []byte, depth int) *Node {
 
 	// Get the next byte to branch on at current depth.
 	// Returns 0 (terminator) if key is exhausted.
-	k := keycheck(key, depth)
+	k := key[depth]
 
 	// Find the child corresponding to byte k and recurse deeper.
 	// Return nil if no child exists for this byte.
