@@ -4,5 +4,5 @@
 
 
 ## What's next?
-* implement grow to transistion to larger nodes
+* implement grow to transition to larger nodes
 * fix the bugs in insert 
