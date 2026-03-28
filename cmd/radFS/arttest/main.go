@@ -7,13 +7,11 @@ import (
 func main() {
 	tree := &art.Tree{}
 
-	tree.Insert([]byte("cab"), "first")
+	tree.Insert([]byte("int"), "first")
 
-	tree.Insert([]byte("can"), "second")
-	tree.Insert([]byte("car"), "first")
-	tree.Insert([]byte("cat"), "first")
-
-	tree.Insert([]byte("caz"), "second")
+	tree.Insert([]byte("intern"), "second")
+	tree.Insert([]byte("internet"), "first")
+	tree.Insert([]byte("i"), "first")
 
 	art.PrintTree(tree.Root(), 0, 0)
 }

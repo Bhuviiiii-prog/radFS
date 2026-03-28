@@ -12,7 +12,7 @@ func insert(n *Node, value string, key []byte, depth int) *Node {
 
 		for i < len(oldkey) && i < len(key) && oldkey[i] == key[i] {
 			prefix_index := i - depth
-			if prefix_index < maxprefixlen { //index goes till 7 so prefix index<8 and not ==8
+			if prefix_index < maxprefixlen {
 				new_node.innerNode.meta.prefix[prefix_index] = key[i] // stores only the till max prefix
 
 			}
@@ -62,12 +62,7 @@ func insert(n *Node, value string, key []byte, depth int) *Node {
 			oldkeybyte = oldkey[depth+p]
 		}
 
-		if p+depth == len(oldkey) { //when the split is exactly the prefix ends eg intern was already there and you add internship
-			new_node.innerNode.leaf = leaf // promote newnode leaf to previous leaf
-
-		} else {
-			new_node = addchild(new_node, oldkeybyte, n)
-		}
+		new_node = addchild(new_node, oldkeybyte, n)
 
 		new_node.innerNode.meta.prefixlen = p
 		if p < maxprefixlen {
