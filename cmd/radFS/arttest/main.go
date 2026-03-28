@@ -5,7 +5,7 @@ import (
 )
 
 func main() {
-	var t art.Tree
+	t := &art.Tree{}
 
 	t.Insert([]byte("cart"), "v1")
 	t.Insert([]byte("car"), "v2")
@@ -20,8 +20,5 @@ func main() {
 
 	v, ok = t.Search([]byte("car"))
 	println("car:", v, ok)
-
-	v, ok = t.Search([]byte("cart"))
-	println("cart:", v, ok)
 
 }
