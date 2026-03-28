@@ -1,5 +1,5 @@
 ## Angelo's Progress
-* implemented the insert fuction
+* implemented the insert function
 * implemented update function in addchild
 
 
