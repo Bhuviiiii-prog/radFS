@@ -1,7 +1,5 @@
 package art
 
-// deletekey recursively walks the tree to find and remove the given key.
-// Returns the (possibly modified) node and whether the key was deleted.
 func deletekey(n *Node, key []byte, depth int) (*Node, bool) {
 	if n == nil {
 		return nil, false
@@ -20,7 +18,17 @@ func deletekey(n *Node, key []byte, depth int) (*Node, bool) {
 	}
 	depth += n.innerNode.meta.prefixlen
 
-	k := keycheck(key, depth)
+	// 3. KEY EXHAUSTION (The Fix)
+	// If the key ends here, the value is in the inner node's leaf field
+	if depth == len(key) {
+		if n.innerNode.leaf != nil {
+			n.innerNode.leaf = nil // Remove the value
+			return n, true
+		}
+		return n, false
+	}
+
+	k := key[depth]
 	child, pos := findchild(k, n)
 	if child == nil {
 		return n, false
