@@ -66,26 +66,30 @@ func insert(n *Node, value string, key []byte, depth int) *Node {
 
 		new_node.innerNode.meta.prefixlen = p
 		if p < maxprefixlen {
-			copy(new_node.innerNode.meta.prefix, n.innerNode.meta.prefix[:p])
+			new_node.innerNode.meta.prefix = deepcopy(n.innerNode.meta.prefix[:p])
 
 		} else {
-			copy(new_node.innerNode.meta.prefix, n.innerNode.meta.prefix[:maxprefixlen])
+			new_node.innerNode.meta.prefix = deepcopy(n.innerNode.meta.prefix[:maxprefixlen])
 		}
 
 		oldprefixlen := n.innerNode.meta.prefixlen
 		n.innerNode.meta.prefixlen = oldprefixlen - (p + 1)
-		if len(n.innerNode.meta.prefix[p+1:oldprefixlen]) < maxprefixlen {
-			copy(n.innerNode.meta.prefix, n.innerNode.meta.prefix[p+1:oldprefixlen])
+		if oldprefixlen < maxprefixlen {
+			n.innerNode.meta.prefix = deepcopy(n.innerNode.meta.prefix[p+1 : oldprefixlen])
 
 		} else {
 			leaf := fetchleaf(n)
-			copy(n.innerNode.meta.prefix, leaf.leaf.key[depth+p+1:depth+p+1+maxprefixlen])
+			n.innerNode.meta.prefix = deepcopy(leaf.leaf.key[depth+p+1 : depth+p+1+maxprefixlen])
 		}
 
 		return new_node
 	}
 
 	depth += n.innerNode.meta.prefixlen
+	if depth == len(key) {
+		n.innerNode.leaf = newleaf(value, key)
+		return n
+	}
 	next, pos := findchild(key[depth], n)
 	if next != nil {
 		n.innerNode.children[pos] = insert(next, value, key, depth+1)
