@@ -37,11 +37,37 @@ func PrintTree(n *Node, level int, depth int) {
 	// Print children
 
 	newDepth := depth + prefixlen
-	for i := 0; i < len(in.keys); i++ {
-		if in.children[i] != nil {
-			fmt.Printf("%s Edge('%c' | %d):\t", indent, in.keys[i], in.keys[i])
 
-			PrintTree(in.children[i], level+1, newDepth+1)
+	switch in.nodeType {
+	case Node4, Node16:
+		for i := 0; i < in.num_children; i++ {
+			key := in.keys[i]
+			child := in.children[i]
+
+			fmt.Printf("%s Edge('%c' | %d):\t", indent, key, key)
+			PrintTree(child, level+1, newDepth+1)
+		}
+
+	case Node48:
+		for b := 0; b < 256; b++ {
+			idx := in.keys[b]
+
+			if idx != 0 {
+
+				child := in.children[idx-1]
+
+				fmt.Printf("%s Edge('%c' | %d):\t", indent, byte(b), b)
+				PrintTree(child, level+1, newDepth+1)
+			}
+		}
+
+	case Node256:
+		for b := 0; b < 256; b++ {
+			child := in.children[b]
+			if child != nil {
+				fmt.Printf("%s Edge('%c' | %d):\t", indent, byte(b), b)
+				PrintTree(child, level+1, newDepth+1)
+			}
 		}
 	}
 }

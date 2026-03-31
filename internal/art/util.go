@@ -142,8 +142,10 @@ func grow(n *Node) *Node {
 
 }
 func copymeta(n *Node, new_node *Node) {
-	new_node.innerNode.meta.prefix = n.innerNode.meta.prefix
+
 	new_node.innerNode.meta.prefixlen = n.innerNode.meta.prefixlen
+	new_node.innerNode.meta.prefix = deepcopy(n.innerNode.meta.prefix[:min(n.innerNode.meta.prefixlen, maxprefixlen)])
+	new_node.innerNode.leaf = n.innerNode.leaf
 
 }
 
@@ -163,5 +165,13 @@ func fetchleaf(n *Node) *Node {
 
 	}
 	return nil
+
+}
+
+func deepcopy(source []byte) []byte {
+
+	desarr := make([]byte, maxprefixlen)
+	copy(desarr, source)
+	return desarr
 
 }
