@@ -4,29 +4,66 @@ package art
 func addchild(n *Node, k byte, child *Node) *Node {
 	in := n.innerNode
 
-	child1, pos1 := findchild(k, n)
+	child1, pos1 := findchild(k, n) // to prevent duplicate insertions
 	if child1 != nil {
 		in.children[pos1] = child
 		return n
 	}
+	switch n.innerNode.nodeType {
+	case Node16, Node4:
+		if n.innerNode.num_children == len(in.keys) {
+			n = grow(n)
 
-	if n.innerNode.num_children == len(in.keys) {
-		n = grow(n)
-		in = n.innerNode
+			return addchild(n, k, child)
+
+		}
+		var i int
+		for i = in.num_children - 1; i >= 0 && k < in.keys[i]; i-- { //shifts until keybyte place is found
+			in.keys[i+1] = in.keys[i]
+			in.children[i+1] = in.children[i]
+
+		}
+
+		in.keys[i+1] = k
+		in.children[i+1] = child
+		in.num_children++
+
+		return n
+	case Node48:
+		if n.innerNode.num_children == len(in.children) {
+			n = grow(n)
+
+			return addchild(n, k, child)
+
+		}
+		if in.keys[k] != 0 { // if key exist then update
+			key := int(n.innerNode.keys[k]) - 1 // the zero slot is used to check if its an empty key so we start filling the index values in key from 1
+			n.innerNode.children[key] = child
+			return n
+
+		}
+
+		for i := 0; i < len(in.children); i++ { // find the free child
+			if in.children[i] == nil {
+				in.children[i] = child
+				in.keys[k] = byte(i + 1)
+				in.num_children++
+
+				break
+
+			}
+
+		}
+	case Node256:
+		if in.children[k] != nil { //update key
+			in.children[k] = child
+			return n
+
+		}
+		in.children[k] = child //inserting new key
+		in.num_children++
 
 	}
-
-	var i int
-	for i = in.num_children - 1; i >= 0 && in.keys[i] > k; i-- {
-		in.keys[i+1] = in.keys[i]
-		in.children[i+1] = in.children[i]
-
-	}
-
-	in.keys[i+1] = k
-	in.children[i+1] = child
-	in.num_children += 1
-
 	return n
 
 }
@@ -106,12 +143,12 @@ func grow(n *Node) *Node {
 		n48 := newNode48()
 		copymeta(n, n48)
 		index := 0
-		for i := 0; i < 16; i++ {
+		for i := 0; i < n.innerNode.num_children; i++ {
 			idx := n.innerNode.keys[i]
 			child := n.innerNode.children[i]
 
 			if child != nil {
-				n48.innerNode.keys[idx] = byte(index + 1) // the reason its index+1 is because we are making 0 a kind of "no children" case
+				n48.innerNode.keys[idx] = byte(index + 1) // the reason its index+1 is because we are making 0 a kind of "no children" case since arrays are automatically init to zero
 
 				n48.innerNode.children[index] = child
 				index++
@@ -125,15 +162,18 @@ func grow(n *Node) *Node {
 	case Node48:
 		n256 := newNode256()
 		copymeta(n, n256)
+		count := 0
 		for i := 0; i < 256; i++ {
 			idx := n.innerNode.keys[i]
 
 			if n.innerNode.keys[i] != 0 {
 				child := n.innerNode.children[int(idx-1)]
 				n256.innerNode.children[i] = child
+				count++
 			}
 
 		}
+		n256.innerNode.num_children = count
 
 		return n256
 
@@ -157,12 +197,26 @@ func fetchleaf(n *Node) *Node {
 		return n.innerNode.leaf
 	}
 
-	for i := 0; i < len(n.innerNode.keys); i++ {
-		if n.innerNode.children[i] != nil {
-			return fetchleaf(n.innerNode.children[i])
-
+	in := n.innerNode
+	switch in.nodeType {
+	case Node4, Node16:
+		for i := 0; i < in.num_children; i++ {
+			if in.children[i] != nil {
+				return fetchleaf(in.children[i])
+			}
 		}
-
+	case Node48:
+		for _, child := range in.children {
+			if child != nil {
+				return fetchleaf(child)
+			}
+		}
+	case Node256:
+		for i := 0; i < len(in.children); i++ {
+			if in.children[i] != nil {
+				return fetchleaf(in.children[i])
+			}
+		}
 	}
 	return nil
 
