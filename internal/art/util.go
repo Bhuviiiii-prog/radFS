@@ -132,8 +132,7 @@ func grow(n *Node) *Node {
 			child := n.innerNode.children[i]
 
 			if child != nil {
-				n48.innerNode.keys[idx] = byte(index + 1) // the reason its index+1 is because we are making 0 a kind of "no children" case
-
+				n48.innerNode.keys[idx] = byte(index + 1)
 				n48.innerNode.children[index] = child
 				index++
 
@@ -163,9 +162,15 @@ func grow(n *Node) *Node {
 
 }
 func copymeta(n *Node, new_node *Node) {
-	new_node.innerNode.meta.prefix = n.innerNode.meta.prefix
+
 	new_node.innerNode.meta.prefixlen = n.innerNode.meta.prefixlen
 
+	limit := n.innerNode.meta.prefixlen
+	if limit > maxprefixlen {
+		limit = maxprefixlen
+	}
+
+	copy(new_node.innerNode.meta.prefix, n.innerNode.meta.prefix[:limit])
 }
 
 func fetchleaf(n *Node) *Node {
