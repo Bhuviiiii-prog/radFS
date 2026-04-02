@@ -240,6 +240,67 @@ func grow(n *Node) *Node {
 	return nil
 
 }
+
+func shrink(n *Node) *Node {
+	in := n.innerNode
+	switch in.nodeType {
+	case Node4:
+		if in.num_children == 0 {
+			if in.leaf != nil {
+				return in.leaf
+			}
+
+			return nil
+		}
+		if in.num_children == 1 && in.leaf == nil {
+			return in.children[0]
+		}
+
+		return n
+
+	case Node16:
+		n4 := newNode4()
+		copymeta(n, n4)
+		for i := 0; i < in.num_children; i++ {
+			n4.innerNode.keys[i] = in.keys[i]
+			n4.innerNode.children[i] = in.children[i]
+		}
+		n4.innerNode.num_children = in.num_children
+		return n4
+
+	case Node48:
+		n16 := newNode16()
+		copymeta(n, n16)
+		count := 0
+		for i := 0; i < 256; i++ {
+			idx := in.keys[i]
+			if idx > 0 {
+				n16.innerNode.keys[count] = byte(i)
+				n16.innerNode.children[count] = in.children[idx-1]
+				count++
+			}
+		}
+		n16.innerNode.num_children = count
+		return n16
+
+	case Node256:
+		n48 := newNode48()
+		copymeta(n, n48)
+		count := 0
+		for i := 0; i < 256; i++ {
+			child := in.children[i]
+			if child != nil {
+				n48.innerNode.children[count] = child
+				n48.innerNode.keys[byte(i)] = byte(count + 1)
+				count++
+			}
+		}
+		n48.innerNode.num_children = count
+		return n48
+	}
+	return n
+}
+
 func copymeta(n *Node, new_node *Node) {
 
 	new_node.innerNode.meta.prefixlen = n.innerNode.meta.prefixlen
