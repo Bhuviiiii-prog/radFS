@@ -21,3 +21,17 @@ func (t *Tree) Search(key []byte) (string, bool) {
 	}
 	return "", false
 }
+func (t *Tree) Delete(key []byte) bool {
+	if t.root == nil {
+		return false
+	}
+
+	newRoot, deleted := deletekey(t.root, key, 0)
+
+	if deleted {
+		t.root = newRoot
+		return true
+	}
+
+	return false
+}

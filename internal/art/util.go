@@ -3,8 +3,12 @@ package art
 // TODO: Helper functions (e.g., prefix matching)
 func addchild(n *Node, k byte, child *Node) *Node {
 	in := n.innerNode
+<<<<<<< HEAD
 
 	child1, pos1 := findchild(k, n) // to prevent duplicate insertions
+=======
+	child1, pos1 := findchild(k, n)
+>>>>>>> ffc8e5cd38b2330448f25c992ff8ea98c1c1c6f5
 	if child1 != nil {
 		in.children[pos1] = child
 		return n
@@ -64,6 +68,20 @@ func addchild(n *Node, k byte, child *Node) *Node {
 		in.num_children++
 
 	}
+<<<<<<< HEAD
+=======
+	var i int
+	for i = in.num_children - 1; i >= 0 && in.keys[i] > k; i-- {
+		in.keys[i+1] = in.keys[i]
+		in.children[i+1] = in.children[i]
+
+	}
+
+	in.keys[i+1] = k
+	in.children[i+1] = child
+	in.num_children += 1
+
+>>>>>>> ffc8e5cd38b2330448f25c992ff8ea98c1c1c6f5
 	return n
 
 }
@@ -95,6 +113,7 @@ func checkprefix(n *Node, key []byte, depth int) int {
 	return i // case when you find mismatch and the mismatch is equal maxprefixlen
 
 }
+
 func findchild(k byte, n *Node) (*Node, int) {
 	in := n.innerNode
 	switch in.nodeType {
@@ -120,6 +139,28 @@ func findchild(k byte, n *Node) (*Node, int) {
 	}
 	return nil, -1
 
+}
+
+// removechild removes the child with key k from node n by shifting
+// all subsequent keys and children left to fill the gap.
+func removechild(n *Node, k byte) {
+	_, pos := findchild(k, n)
+	if pos == -1 {
+		return // key not found, nothing to remove
+	}
+
+	in := n.innerNode
+	last := len(in.keys) - 1
+
+	// shift everything after pos one step to the left
+	for i := pos; i < last; i++ {
+		in.keys[i] = in.keys[i+1]
+		in.children[i] = in.children[i+1]
+	}
+
+	// clear the now-duplicate last slot to avoid stale pointers
+	in.keys[last] = 0
+	in.children[last] = nil
 }
 
 func grow(n *Node) *Node {
@@ -148,8 +189,12 @@ func grow(n *Node) *Node {
 			child := n.innerNode.children[i]
 
 			if child != nil {
+<<<<<<< HEAD
 				n48.innerNode.keys[idx] = byte(index + 1) // the reason its index+1 is because we are making 0 a kind of "no children" case since arrays are automatically init to zero
 
+=======
+				n48.innerNode.keys[idx] = byte(index + 1)
+>>>>>>> ffc8e5cd38b2330448f25c992ff8ea98c1c1c6f5
 				n48.innerNode.children[index] = child
 				index++
 
@@ -187,6 +232,12 @@ func copymeta(n *Node, new_node *Node) {
 	new_node.innerNode.meta.prefix = deepcopy(n.innerNode.meta.prefix[:min(n.innerNode.meta.prefixlen, maxprefixlen)])
 	new_node.innerNode.leaf = n.innerNode.leaf
 
+	limit := n.innerNode.meta.prefixlen
+	if limit > maxprefixlen {
+		limit = maxprefixlen
+	}
+
+	copy(new_node.innerNode.meta.prefix, n.innerNode.meta.prefix[:limit])
 }
 
 func fetchleaf(n *Node) *Node {
