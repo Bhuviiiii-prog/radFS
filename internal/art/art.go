@@ -35,3 +35,15 @@ func (t *Tree) Delete(key []byte) bool {
 
 	return false
 }
+
+func GetNodeTypeName(n *Node) string {
+	if n == nil {
+		return "Nil"
+	}
+	if isleaf(n) {
+		return "Leaf"
+	}
+
+	types := []string{"Node4", "Node16", "Node48", "Node256"}
+	return types[n.innerNode.nodeType]
+}
