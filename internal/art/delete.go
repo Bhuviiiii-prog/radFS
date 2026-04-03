@@ -40,7 +40,7 @@ func deletekey(n *Node, key []byte, depth int) (*Node, bool) {
 	}
 
 	if newChild == nil {
-		removechild(n, k)
+		n = removechild(n, k)
 	} else {
 		n.innerNode.children[pos] = newChild
 	}
